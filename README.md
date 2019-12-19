@@ -1,1 +1,1 @@
-# Automate.io
+# Command Line Dictionary Tool
