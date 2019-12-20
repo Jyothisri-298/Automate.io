@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const program = require('commander');
 const inquirer = require('inquirer');
 const request = require('request');
@@ -126,7 +128,7 @@ function getExamples(word){
 
 }
 
- //Method to get full Dictionary
+ //Method to get full Dictionary of the given word
  async function getFullDict(word){
     var fullDictionary = {}
     try{
@@ -137,7 +139,7 @@ function getExamples(word){
         return fullDictionary;
     }
     catch(err){
-        console.log(err);
+        reject(err);
     }
    
 }
@@ -186,10 +188,10 @@ function playGame(){
            getFullDict(randomWord).then((res) => {
                let fullDict = res;
                fullDict["word"] = randomWord;
-               console.log();
                console.log("********************************** Play Word Game ************************************");
                console.log();
-               console.log(fullDict.definitions[0]);
+               console.log("Hint( Definition of the word ):  ".yellow+fullDict.definitions[0]);
+               console.log();
                fullDict.definitions.push(fullDict.definitions.splice(0,1)[0])
                guessWord(fullDict);
            })
@@ -231,14 +233,14 @@ function iterate(fullDict){
       }
       else if(answers.choice == 2){
           console.log();
-         console.log("Hint:  ".yellow+fullDict.definitions[0]);
+         console.log("Hint( Definition of the word ): ".yellow+fullDict.definitions[0]);
          fullDict.definitions.push(fullDict.definitions.splice(0,1)[0])
          guessWord(fullDict);
       }
       else if(answers.choice == 3){
             console.log("The correct word is "+ fullDict.word);
             console.log()
-            console.log("Full Dictionary :".magenta);
+            console.log("Full Dictionary of the word: ".magenta);
             getFullDict(fullDict.word)
             .then((res) => {
                 finalResults(fullDict.word,'Definitions',res.definitions);
@@ -248,7 +250,7 @@ function iterate(fullDict){
           })
       }
       else{
-          console.log("1Please enter correct choice");
+          console.log("Please enter correct choice");
           iterate(fullDict);
       }
    })
@@ -312,7 +314,7 @@ program
     });
 
 
-//Actions to get full dictionary
+//Actions to get full dictionary for the given word
 program
 .command('*')
 .description(' word full dict')
@@ -325,14 +327,17 @@ program
            finalResults(examples,'Antonyms',fullInfo.antonyms);
            finalResults(examples,'Examples',fullInfo.examples);
         })
+        .catch(function(error){
+            console.log("The word not found in Dictionary");
+        })
 });
 
-//Actions to get RandomWord
+//Actions to get full dictionary for the RandomWord
 if(process.argv.length <= 2){
     
     getRandomWord().then((randomWord) => {
         console.log();
-        console.log(randomWord);
+        console.log("The Randomword is: "+randomWord);
         getFullDict(randomWord).then((res) => {
             finalResults(randomWord,'Definitions',res.definitions);
             finalResults(randomWord,'Synonyms',res.synonyms);

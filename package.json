@@ -1,12 +1,14 @@
 {
-  "name": "dictionary-tool",
+  "name": "dict",
   "version": "1.0.0",
   "description": "Command line dictionary tool",
   "main": "dict.js",
+  "preferGlobal": true,
+  "bin": "./dict.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Jyothi Sri Guntu",
   "license": "ISC",
   "dependencies": {
     "colors": "^1.4.0",
