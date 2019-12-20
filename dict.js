@@ -1,6 +1,7 @@
 const program = require('commander');
-const prompt = require('inquirer');
+const inquirer = require('inquirer');
 const request = require('request');
+
 
 //Method to get word definitions
 function getDefinitions(word){
@@ -17,10 +18,10 @@ function getDefinitions(word){
                     reject("The word not found in Dictionary");
                 }
                 else{
+                    let defn = [];
                     obj.forEach(function(element){
-                        //console.log(element.text);
-                        console.log(element.text);
-                        resolve();
+                        defn.push(element.text);
+                        resolve(defn);
                     })
                 }
             }
@@ -42,15 +43,20 @@ function getSynonyms(word){
                      reject("The word not found in Dictionary");
                  }
                  else{
+                     let syn = [];
                      obj.forEach(function(element){
                          if(element.relationshipType == "synonym"){
                              let synonyms = element.words;
                              synonyms.forEach(function(element){
-                                 console.log(element);
-                                 resolve();
+                                 syn.push(element);
+                                 resolve(syn);
                              })
                          }
+                         else if(obj.length == 1){
+                             resolve(syn);
+                        }
                      })
+
                  }
              }
          })
@@ -71,14 +77,19 @@ function getAntonyms(word){
                         reject("The word not found in Dictionary");
                        }
                     else{
+                            let ant = [];
                             obj.forEach(function(element){
                                     if(element.relationshipType == "antonym"){
                                             let antonyms = element.words;
                                             antonyms.forEach(function(element){
-                                                console.log(element);
-                                                resolve();
+                                                ant.push(element);
+                                                resolve(ant);
                                             })
-                                    }    
+                                    } 
+                                    else if(obj.length == 1){
+                                        resolve(ant);
+                                    }
+                                       
 
                             })
                     }
@@ -102,10 +113,10 @@ function getExamples(word){
                     }
                 else{
                     let examples = obj.examples;
+                        let ex = [];
                         examples.forEach(function(element){
-                            console.log(element.text);
-                            console.log();
-                            resolve();
+                            ex.push(element.text);
+                            resolve(ex);
                         })
                     }  
 
@@ -115,12 +126,33 @@ function getExamples(word){
 
 }
 
+
+
+function finalResults(word,title,data){
+    console.log();
+    console.log(title+" of the word "+word+" are:");
+    console.log("**********************************");
+    if(data == ""){
+        console.log("There is no "+title+ "  of the given word");
+    }
+    else{
+        data.forEach(function(element){
+            console.log("\t=>  "+element);
+        });
+    }
+   
+}
+
 //Actions for word definitions
 program
     .command('defn <word>')
     .description('Definition of the word')
     .action((word) => {
-        getDefinitions(word).catch(function(error){
+        getDefinitions(word)
+        .then((defn) => {
+           finalResults(word,'Definitions',defn);
+        })
+        .catch(function(error){
             console.log(error);
         });
 });
@@ -130,7 +162,11 @@ program
     .command('syn <word>')
     .description('synonyms of the word')
     .action((word) => {
-        getSynonyms(word).catch(function(error){
+        getSynonyms(word)
+        .then((syn) => {
+            finalResults(word,'Synonyms',syn);
+        })
+        .catch(function(error){
             console.log(error);
         });
     });
@@ -140,7 +176,11 @@ program
     .command('ant <word>')
     .description('antonyms of the word')
     .action((word) => {
-        getAntonyms(word).catch(function(err){
+        getAntonyms(word)
+        .then((ant) => {
+          finalResults(word,'Antonyms',ant);
+        })
+        .catch(function(err){
             console.log(err);
         });
     });
@@ -150,20 +190,23 @@ program
     .command('ex <word>')
     .description('Examples of the word')
     .action((word) => {
-        getExamples(word).catch(function(error){
+        getExamples(word)
+        .then((ex) => {
+        finalResults(word,'Examples',ex);
+        })
+        .catch(function(error){
             console.log(error);
         });
     });
-
-//Actions for full dictionary
+//Actions to get full dictionary
 program
     .command('*')
-    //.option('<word>')
     .description(' word full dict')
     .action(function(word){
         let examples = word.parent.args[0];
     });
 
+//Actions to get RandomWord
 if(process.argv.length <= 2){
     let url = "https://fourtytwowords.herokuapp.com/words/randomWord?api_key=b972c7ca44dda72a5b482052b1f5e13470e01477f3fb97c85d5313b3c112627073481104fec2fb1a0cc9d84c2212474c0cbe7d8e59d7b95c7cb32a1133f778abd1857bf934ba06647fda4f59e878d164"
     request(url,function(err,res,body){
@@ -180,7 +223,9 @@ if(process.argv.length <= 2){
 program
     .command('play')
     .description('Dictionary game')
-    .action(() => {});
+    .action(() => {
+        playGame();
+    });
 
 
 program
