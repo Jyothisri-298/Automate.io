@@ -129,7 +129,6 @@ function getExamples(word){
  //Method to get full Dictionary
  async function getFullDict(word){
     var fullDictionary = {}
-    //return new Promise(function(resolve,reject){
     try{
         fullDictionary["definitions"] = await getDefinitions(word);
         fullDictionary["synonyms"] = await getSynonyms(word);
@@ -142,10 +141,27 @@ function getExamples(word){
     }
    
 }
+ 
+//Method to get Randomword
+function getRandomWord(){
+    let url = "https://fourtytwowords.herokuapp.com/words/randomWord?api_key=b972c7ca44dda72a5b482052b1f5e13470e01477f3fb97c85d5313b3c112627073481104fec2fb1a0cc9d84c2212474c0cbe7d8e59d7b95c7cb32a1133f778abd1857bf934ba06647fda4f59e878d164"
+    return new Promise(function(resolve,reject){
+        request(url,function(err,res,body){
+            if(err){
+                reject("There is some problem in API. Try again after some time. /n");
+              }
+            else{
+                let obj = JSON.parse(body);
+                let randomWord = obj.word;
+                resolve(randomWord);
+            }
+            
+        })
+    })
+   
+}
 
-
-
-
+//Method to get finalResults
 function finalResults(word,title,data){
     console.log();
     console.log(title+" of the word "+word+" are:");
@@ -161,7 +177,7 @@ function finalResults(word,title,data){
    
 }
 
-//Actions for word definitions
+//Actions to get word definitions
 program
     .command('defn <word>')
     .description('Definition of the word')
@@ -175,7 +191,7 @@ program
         });
 });
 
-//Actions for word Synonyms
+//Actions to get word Synonyms
 program
     .command('syn <word>')
     .description('synonyms of the word')
@@ -189,7 +205,7 @@ program
         });
     });
 
-//Actions for word Antonyms
+//Actions to get word Antonyms
 program
     .command('ant <word>')
     .description('antonyms of the word')
@@ -203,7 +219,7 @@ program
         });
     });
 
-//Actions for word Examples
+//Actions to get word Examples
 program
     .command('ex <word>')
     .description('Examples of the word')
@@ -235,14 +251,19 @@ program
 
 //Actions to get RandomWord
 if(process.argv.length <= 2){
-    let url = "https://fourtytwowords.herokuapp.com/words/randomWord?api_key=b972c7ca44dda72a5b482052b1f5e13470e01477f3fb97c85d5313b3c112627073481104fec2fb1a0cc9d84c2212474c0cbe7d8e59d7b95c7cb32a1133f778abd1857bf934ba06647fda4f59e878d164"
-    request(url,function(err,res,body){
-        let obj = JSON.parse(body);
-        let randomWord = obj.word;
+    
+    getRandomWord().then((randomWord) => {
+        console.log();
         console.log(randomWord);
-
-    })
-}
+        getFullDict(randomWord).then((res) => {
+            finalResults(randomWord,'Definitions',res.definitions);
+            finalResults(randomWord,'Synonyms',res.synonyms);
+            finalResults(randomWord,'Antonyms',res.antonyms);
+            finalResults(randomWord,'Examples',res.examples);
+        })
+    });
+      
+} 
 
 
 
