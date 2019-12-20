@@ -9,11 +9,10 @@ function getDefinitions(word){
     return new Promise(function(resolve,reject){
         request(url,function(err,res,body){
             if(err){
-                reject("There is some problem with API. Try again after sometime.\n")
+                reject("There is some problem with API. Try again after sometime.\n");
             }
             else{
                 let obj = JSON.parse(body);
-                // console.log(obj);
                 if(obj.error == "word not found"){
                     reject("The word not found in Dictionary");
                 }
@@ -164,12 +163,12 @@ function getRandomWord(){
 //Method to get finalResults
 function finalResults(word,title,data){
     console.log();
-    console.log(title+" of the word "+word+" are:");
-    console.log("**********************************");
     if(data == ""){
-        console.log("There is no "+title+ "  of the given word");
+        console.log("There is no "+title+" of the '"+ word +"' word");
     }
     else{
+        console.log(title+" of the word '"+word+"' are:");
+        console.log("**********************************");
         data.forEach(function(element){
             console.log("\t=>  "+element);
         });
@@ -183,7 +182,6 @@ function finalResults(word,title,data){
 function playGame(){
     return new Promise(function(resolve,reject){
        getRandomWord().then((randomWord) => {
-           console.log(randomWord)
            getFullDict(randomWord).then((res) => {
                let fullDict = res;
                fullDict["word"] = randomWord;
@@ -222,7 +220,6 @@ function iterate(fullDict){
        "\n1.Try again \n2.Hint \n3.Quit \nPlease enter your choice"
    })
    .then((answers) => {
-      console.log(answers.choice); 
       if(answers.choice == 1){
           guessWord(fullDict);
       }
@@ -233,8 +230,13 @@ function iterate(fullDict){
       }
       else{
           console.log("The correct word is "+ fullDict.word);
-          getFullDict(fullDict.word).then((res) => console.log(res));
-          //process.exit();
+          getFullDict(fullDict.word)
+          .then((res) => {
+            finalResults(fullDict.word,'Definitions',res.definitions);
+            finalResults(fullDict.word,'Synonyms',res.synonyms);
+            finalResults(fullDict.word,'Antonyms',res.antonyms);
+            finalResults(fullDict.word,'Examples',res.examples);
+          })
       }
    })
 }
