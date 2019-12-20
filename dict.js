@@ -126,6 +126,24 @@ function getExamples(word){
 
 }
 
+ //Method to get full Dictionary
+ async function getFullDict(word){
+    var fullDictionary = {}
+    //return new Promise(function(resolve,reject){
+    try{
+        fullDictionary["definitions"] = await getDefinitions(word);
+        fullDictionary["synonyms"] = await getSynonyms(word);
+        fullDictionary["antonyms"] = await getAntonyms(word);
+        fullDictionary["examples"] = await getExamples(word);
+        return fullDictionary;
+    }
+    catch(err){
+        console.log(err);
+    }
+   
+}
+
+
 
 
 function finalResults(word,title,data){
@@ -198,13 +216,22 @@ program
             console.log(error);
         });
     });
+
+
 //Actions to get full dictionary
 program
-    .command('*')
-    .description(' word full dict')
-    .action(function(word){
-        let examples = word.parent.args[0];
-    });
+.command('*')
+.description(' word full dict')
+.action(function(word){
+    let examples = word.parent.args[0];
+    getFullDict(examples)
+        .then((fullInfo) =>{
+           finalResults(examples,'Definitions',fullInfo.definitions);
+           finalResults(examples,'Synonyms',fullInfo.synonyms);
+           finalResults(examples,'Antonyms',fullInfo.antonyms);
+           finalResults(examples,'Examples',fullInfo.examples);
+        })
+});
 
 //Actions to get RandomWord
 if(process.argv.length <= 2){
