@@ -1,6 +1,7 @@
 const program = require('commander');
 const inquirer = require('inquirer');
 const request = require('request');
+const colors = require('colors');
 
 
 //Method to get word definitions
@@ -185,6 +186,9 @@ function playGame(){
            getFullDict(randomWord).then((res) => {
                let fullDict = res;
                fullDict["word"] = randomWord;
+               console.log();
+               console.log("********************************** Play Word Game ************************************");
+               console.log();
                console.log(fullDict.definitions[0]);
                fullDict.definitions.push(fullDict.definitions.splice(0,1)[0])
                guessWord(fullDict);
@@ -203,10 +207,12 @@ function guessWord(fullDict){
    }])
   .then((answers) => {
       if(answers.word == fullDict.word || fullDict.synonyms.includes(answers.word)){
-          console.log("Correct answer");
+          console.log();
+          console.log("*******************************   Your Gusess is correct....!   *****************************".green);
       }
       else{
-          console.log("Wrong answer");
+          console.log();
+          console.log("********************************   Wrong answer   ************************************".red);
           iterate(fullDict);
       }
   })
@@ -224,19 +230,26 @@ function iterate(fullDict){
           guessWord(fullDict);
       }
       else if(answers.choice == 2){
-         console.log(fullDict.definitions[0]);
+          console.log();
+         console.log("Hint:  ".yellow+fullDict.definitions[0]);
          fullDict.definitions.push(fullDict.definitions.splice(0,1)[0])
          guessWord(fullDict);
       }
-      else{
-          console.log("The correct word is "+ fullDict.word);
-          getFullDict(fullDict.word)
-          .then((res) => {
-            finalResults(fullDict.word,'Definitions',res.definitions);
-            finalResults(fullDict.word,'Synonyms',res.synonyms);
-            finalResults(fullDict.word,'Antonyms',res.antonyms);
-            finalResults(fullDict.word,'Examples',res.examples);
+      else if(answers.choice == 3){
+            console.log("The correct word is "+ fullDict.word);
+            console.log()
+            console.log("Full Dictionary :".magenta);
+            getFullDict(fullDict.word)
+            .then((res) => {
+                finalResults(fullDict.word,'Definitions',res.definitions);
+                finalResults(fullDict.word,'Synonyms',res.synonyms);
+                finalResults(fullDict.word,'Antonyms',res.antonyms);
+                finalResults(fullDict.word,'Examples',res.examples);
           })
+      }
+      else{
+          console.log("1Please enter correct choice");
+          iterate(fullDict);
       }
    })
 }
