@@ -177,6 +177,69 @@ function finalResults(word,title,data){
    
 }
 
+
+
+//Method to playGame
+function playGame(){
+    return new Promise(function(resolve,reject){
+       getRandomWord().then((randomWord) => {
+           console.log(randomWord)
+           getFullDict(randomWord).then((res) => {
+               let fullDict = res;
+               fullDict["word"] = randomWord;
+               console.log(fullDict.definitions[0]);
+               fullDict.definitions.push(fullDict.definitions.splice(0,1)[0])
+               guessWord(fullDict);
+           })
+
+       })
+       
+    })
+}
+
+function guessWord(fullDict){
+  inquirer.prompt([{
+       type: "input",
+       name : "word",
+       message:"Guess the word : "
+   }])
+  .then((answers) => {
+      if(answers.word == fullDict.word || fullDict.synonyms.includes(answers.word)){
+          console.log("Correct answer");
+      }
+      else{
+          console.log("Wrong answer");
+          iterate(fullDict);
+      }
+  })
+}
+
+function iterate(fullDict){
+   inquirer.prompt({
+       type: "input",
+       name: "choice",
+       message: 
+       "\n1.Try again \n2.Hint \n3.Quit \nPlease enter your choice"
+   })
+   .then((answers) => {
+      console.log(answers.choice); 
+      if(answers.choice == 1){
+          guessWord(fullDict);
+      }
+      else if(answers.choice == 2){
+         console.log(fullDict.definitions[0]);
+         fullDict.definitions.push(fullDict.definitions.splice(0,1)[0])
+         guessWord(fullDict);
+      }
+      else{
+          console.log("The correct word is "+ fullDict.word);
+          getFullDict(fullDict.word).then((res) => console.log(res));
+          //process.exit();
+      }
+   })
+}
+
+
 //Actions to get word definitions
 program
     .command('defn <word>')
